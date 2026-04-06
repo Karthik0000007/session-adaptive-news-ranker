@@ -1,0 +1,28 @@
+# Phase 1 Configuration
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  mind_behaviors: "behaviors.tsv"
+  mind_news: "news.tsv"
+
+session:
+  gap_minutes: 30  # Session boundary threshold
+  min_session_length: 2  # Minimum interactions per session
+  
+simulation:
+  dwell_time:
+    clicked_mean: 2.0  # Log-normal mean for clicked items (log scale)
+    clicked_sigma: 0.5  # Log-normal std for clicked items
+    not_clicked_min: 0.5  # Uniform min for non-clicked
+    not_clicked_max: 2.0  # Uniform max for non-clicked
+  
+  negative_samples: 10  # Number of negatives per positive
+
+features:
+  recent_categories_k: 5  # Track last K categories
+  entropy_smoothing: 1e-10  # Prevent log(0)
+
+output:
+  sessions_file: "sessions.pkl"
+  features_file: "training_samples.pkl"
+  stats_file: "dataset_stats.json"
