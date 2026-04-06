@@ -33,6 +33,12 @@ Data → Candidate Generation → Base Ranking → Decision Layer → Serving
 - Session-aware user embeddings
 - Retrieval evaluation (Recall@K, Hit Rate@K, MRR)
 
+### ✅ Phase 3: Base Ranking Models
+- LightGBM models for CTR, dwell time, and retention
+- Comprehensive feature engineering (user, item, session, interaction)
+- Probability calibration (Platt scaling)
+- Time-based train/validation split
+
 ## Quick Start
 
 ### Prerequisites
@@ -68,6 +74,18 @@ This will:
 - Evaluate retrieval performance (Recall@K, Hit Rate@K)
 - Save retrieval system for Phase 3
 
+### Run Phase 3 Pipeline
+```bash
+python phase3_pipeline.py
+```
+
+This will:
+- Build feature engineering pipeline (user profiles, item stats)
+- Train CTR, dwell, and retention models (LightGBM)
+- Calibrate probability predictions
+- Evaluate model performance (AUC, RMSE, LogLoss)
+- Save ranking models for Phase 4
+
 ### Configuration
 Edit `config.yaml` to adjust:
 - Session gap threshold
@@ -82,10 +100,12 @@ session-adaptive-news-ranker/
 ├── config.yaml                 # Configuration
 ├── pipeline.py                 # Phase 1 pipeline
 ├── phase2_pipeline.py          # Phase 2 pipeline
+├── phase3_pipeline.py          # Phase 3 pipeline
 ├── requirements.txt
 ├── phase0_design_doc.md       # Formal problem definition
 ├── PHASE1_GUIDE.md            # Phase 1 implementation guide
 ├── PHASE2_GUIDE.md            # Phase 2 implementation guide
+├── PHASE3_GUIDE.md            # Phase 3 implementation guide
 ├── src/
 │   ├── data_loader.py         # MIND dataset loading
 │   ├── session_builder.py     # Session construction
@@ -97,7 +117,10 @@ session-adaptive-news-ranker/
 │   ├── two_tower_model.py     # Two-tower orchestration
 │   ├── faiss_index.py         # FAISS index for retrieval
 │   ├── retrieval_system.py    # End-to-end retrieval API
-│   └── retrieval_evaluator.py # Retrieval evaluation metrics
+│   ├── retrieval_evaluator.py # Retrieval evaluation metrics
+│   ├── base_ranker.py         # LightGBM ranking model
+│   ├── ranking_features.py    # Feature engineering pipeline
+│   └── ranking_system.py      # Multi-objective ranking orchestration
 ├── data/
 │   ├── raw/                   # MIND dataset files
 │   └── processed/             # Generated sessions, features, models
@@ -127,7 +150,7 @@ session-adaptive-news-ranker/
 - [x] Phase 0: Problem Framing
 - [x] Phase 1: Dataset & Session Simulation
 - [x] Phase 2: Candidate Generation (Retrieval System)
-- [ ] Phase 3: Base Ranking Models
+- [x] Phase 3: Base Ranking Models
 - [ ] Phase 4: Multi-Objective Scoring
 - [ ] Phase 5: Rule-Based Weight Adaptation
 - [ ] Phase 6: Contextual Bandit Integration
