@@ -21,11 +21,17 @@ Data → Candidate Generation → Base Ranking → Decision Layer → Serving
 - Session state schema designed
 - Evaluation metrics established
 
-### 🚧 Phase 1: Dataset & Session Simulation (In Progress)
+### ✅ Phase 1: Dataset & Session Simulation
 - MIND dataset integration
 - Session construction from impressions
 - Behavioral signal simulation (dwell time, fatigue)
 - Feature extraction pipeline
+
+### ✅ Phase 2: Candidate Generation (Retrieval System)
+- Two-tower architecture (item + user encoders)
+- FAISS index for fast similarity search
+- Session-aware user embeddings
+- Retrieval evaluation (Recall@K, Hit Rate@K, MRR)
 
 ## Quick Start
 
@@ -50,6 +56,18 @@ This will:
 - Extract session state features
 - Generate training samples with negative sampling
 
+### Run Phase 2 Pipeline
+```bash
+python phase2_pipeline.py
+```
+
+This will:
+- Train two-tower model (item + user encoders)
+- Precompute item embeddings
+- Build FAISS index for fast retrieval
+- Evaluate retrieval performance (Recall@K, Hit Rate@K)
+- Save retrieval system for Phase 3
+
 ### Configuration
 Edit `config.yaml` to adjust:
 - Session gap threshold
@@ -62,18 +80,27 @@ Edit `config.yaml` to adjust:
 ```
 session-adaptive-news-ranker/
 ├── config.yaml                 # Configuration
-├── pipeline.py                 # Main Phase 1 pipeline
+├── pipeline.py                 # Phase 1 pipeline
+├── phase2_pipeline.py          # Phase 2 pipeline
 ├── requirements.txt
 ├── phase0_design_doc.md       # Formal problem definition
+├── PHASE1_GUIDE.md            # Phase 1 implementation guide
+├── PHASE2_GUIDE.md            # Phase 2 implementation guide
 ├── src/
 │   ├── data_loader.py         # MIND dataset loading
 │   ├── session_builder.py     # Session construction
 │   ├── signal_simulator.py    # Behavioral signal simulation
 │   ├── feature_extractor.py   # Session state features
-│   └── negative_sampler.py    # Negative sampling
+│   ├── negative_sampler.py    # Negative sampling
+│   ├── item_encoder.py        # Article encoder (TF-IDF + categories)
+│   ├── user_encoder.py        # Session-aware user encoder
+│   ├── two_tower_model.py     # Two-tower orchestration
+│   ├── faiss_index.py         # FAISS index for retrieval
+│   ├── retrieval_system.py    # End-to-end retrieval API
+│   └── retrieval_evaluator.py # Retrieval evaluation metrics
 ├── data/
 │   ├── raw/                   # MIND dataset files
-│   └── processed/             # Generated sessions & features
+│   └── processed/             # Generated sessions, features, models
 └── notebooks/                 # Analysis notebooks (coming soon)
 ```
 
@@ -99,7 +126,7 @@ session-adaptive-news-ranker/
 
 - [x] Phase 0: Problem Framing
 - [x] Phase 1: Dataset & Session Simulation
-- [ ] Phase 2: Feature Engineering & Candidate Generation
+- [x] Phase 2: Candidate Generation (Retrieval System)
 - [ ] Phase 3: Base Ranking Models
 - [ ] Phase 4: Multi-Objective Scoring
 - [ ] Phase 5: Rule-Based Weight Adaptation
