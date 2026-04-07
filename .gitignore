@@ -33,3 +33,17 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Redis
+dump.rdb
+
+# Docker
+.dockerignore
+
+# Streamlit
+.streamlit/
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
