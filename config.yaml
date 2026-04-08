@@ -1,28 +1,64 @@
-# Phase 1 Configuration
+# Session-Adaptive News Ranker Configuration
+
+# Data Configuration
 data:
-  raw_dir: "data/raw"
-  processed_dir: "data/processed"
-  mind_behaviors: "behaviors.tsv"
-  mind_news: "news.tsv"
+  dataset: mind  # mind dataset
+  data_path: data/raw/
+  processed_path: data/processed/
+  session_gap_minutes: 30
+  max_session_length: 50
+  negative_samples: 4
 
-session:
-  gap_minutes: 30  # Session boundary threshold
-  min_session_length: 2  # Minimum interactions per session
-  
-simulation:
-  dwell_time:
-    clicked_mean: 2.0  # Log-normal mean for clicked items (log scale)
-    clicked_sigma: 0.5  # Log-normal std for clicked items
-    not_clicked_min: 0.5  # Uniform min for non-clicked
-    not_clicked_max: 2.0  # Uniform max for non-clicked
-  
-  negative_samples: 10  # Number of negatives per positive
+# Retrieval Configuration
+retrieval:
+  embedding_dim: 128
+  batch_size: 256
+  learning_rate: 0.001
+  epochs: 50
+  max_features: 5000  # TF-IDF max features
 
-features:
-  recent_categories_k: 5  # Track last K categories
-  entropy_smoothing: 1e-10  # Prevent log(0)
+# Ranking Configuration
+ranking:
+  model_type: lightgbm
+  calibration: true
+  num_leaves: 31
+  learning_rate: 0.05
+  n_estimators: 100
 
-output:
-  sessions_file: "sessions.pkl"
-  features_file: "training_samples.pkl"
-  stats_file: "dataset_stats.json"
+# Decision Layer Configuration
+decision:
+  default_weights: [0.4, 0.3, 0.2, 0.1]  # [E, R, D, N]
+  smoothing_factor: 0.7
+  diversity_threshold: 0.3
+
+# Bandit Configuration
+bandit:
+  algorithm: linucb
+  alpha: 0.5  # Exploration parameter
+  n_actions: 4
+  n_features: 11
+  num_iterations: 10000
+
+# Serving Configuration
+serving:
+  host: 0.0.0.0
+  port: 8000
+  redis_host: localhost
+  redis_port: 6379
+  cache_ttl: 300  # seconds
+  latency_target_ms: 150
+
+# Evaluation Configuration
+evaluation:
+  test_frac: 0.1
+  val_frac: 0.1
+  metrics: [mse, rmse, ci, pearson, spearman]
+  num_seeds: 3
+  seeds: [42, 123, 456]
+
+# Logging Configuration
+logging:
+  level: INFO
+  tensorboard_dir: runs/
+  results_dir: results/
+  checkpoint_dir: checkpoints/
