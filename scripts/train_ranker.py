@@ -2,7 +2,9 @@
 Phase 3 Pipeline: Base Ranking Models
 
 Trains CTR, Dwell, and Retention models
+Includes position-bias IPS correction for CTR training.
 """
+import numpy as np
 import yaml
 import pickle
 import json
@@ -86,8 +88,23 @@ def main():
     print(f"  - Click rate: {training_df['label_click'].mean():.4f}")
     print(f"  - Avg dwell (clicked): {training_df[training_df['label_click']==1]['label_dwell'].mean():.2f}s")
     
+    # Compute IPS sample weights for position debiasing
+    print("\n[5/6] Computing position-bias IPS weights...")
+    if '_position_for_ips' in training_df.columns:
+        positions = training_df['_position_for_ips'].values
+        position_bias = 1.0 / np.log2(positions + 2)  # Cascade model
+        sample_weights = 1.0 / (position_bias + 1e-8)  # Inverse propensity
+        # Normalize weights to mean=1 for stability
+        sample_weights = sample_weights / sample_weights.mean()
+        training_df['_sample_weight'] = sample_weights
+        # Drop position IPS column from features
+        training_df = training_df.drop(columns=['_position_for_ips'])
+        print(f"  - IPS weight range: [{sample_weights.min():.3f}, {sample_weights.max():.3f}]")
+    else:
+        print("  - No position data found, skipping IPS weighting")
+    
     # Train ranking system
-    print("\n[5/5] Training ranking models...")
+    print("\n[6/6] Training ranking models...")
     ranking_system = RankingSystem(config['ranking'])
     ranking_system.train(training_df, feature_builder)
     

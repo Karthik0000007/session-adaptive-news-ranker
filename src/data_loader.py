@@ -99,3 +99,60 @@ class MINDDataLoader:
             }
         
         return metadata
+
+    @staticmethod
+    def build_retention_labels(events: List[Dict],
+                                session_gap_minutes: float = 5.0) -> List[Dict]:
+        """
+        Compute session-continuation labels from interaction events.
+        
+        Label = 1 if user has another interaction within session_gap_minutes
+        Label = 0 if session ends after this interaction
+        
+        This produces labels that are genuinely different from click labels,
+        fixing the broken 4-objective system.
+        
+        Args:
+            events: List of interaction dicts with 'user_id', 'timestamp' keys
+            session_gap_minutes: Max gap (minutes) for session continuation
+            
+        Returns:
+            Same events list with 'label_retention' field added
+        """
+        import numpy as np
+        
+        # Sort events by user and time
+        events_df = pd.DataFrame(events)
+        if 'timestamp' not in events_df.columns or len(events_df) == 0:
+            for e in events:
+                e['label_retention'] = 0
+            return events
+        
+        events_df = events_df.sort_values(['user_id', 'timestamp']).reset_index(drop=True)
+        events_df['label_retention'] = 0
+        
+        for user_id, group in events_df.groupby('user_id'):
+            indices = group.index.tolist()
+            timestamps = group['timestamp'].values
+            
+            for i in range(len(indices) - 1):
+                current_ts = pd.Timestamp(timestamps[i])
+                next_ts = pd.Timestamp(timestamps[i + 1])
+                gap_minutes = (next_ts - current_ts).total_seconds() / 60.0
+                
+                if gap_minutes <= session_gap_minutes:
+                    events_df.loc[indices[i], 'label_retention'] = 1
+            # Last event in user sequence: label = 0 (session ends)
+        
+        # Map back to events list
+        for idx, event in enumerate(events):
+            matching = events_df[
+                (events_df['user_id'] == event['user_id']) &
+                (events_df['article_id'] == event['article_id'])
+            ]
+            if len(matching) > 0:
+                event['label_retention'] = int(matching.iloc[0]['label_retention'])
+            else:
+                event['label_retention'] = 0
+        
+        return events
