@@ -22,6 +22,20 @@ features:
   recent_categories_k: 5  # Track last K categories
   entropy_smoothing: 1e-10  # Prevent log(0)
 
+# Fix: Data freshness strategy (Gap 2.2)
+freshness:
+  session_state: realtime          # Redis, per-request
+  user_embeddings: 3600            # 1 hour (seconds)
+  article_embeddings: 21600        # 6 hours
+  faiss_index: 21600               # 6 hours
+  popular_articles: 3600           # 1 hour
+  model_version: daily             # Retrain overnight
+
+# Retention label configuration (Fix 1)
+retention:
+  session_gap_minutes: 5.0         # Max gap for session continuation
+  label_method: "timestamp_gap"    # timestamp_gap | dwell_heuristic
+
 output:
   sessions_file: "sessions.pkl"
   features_file: "training_samples.pkl"

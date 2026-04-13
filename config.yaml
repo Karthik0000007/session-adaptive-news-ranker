@@ -52,7 +52,9 @@ serving:
 evaluation:
   test_frac: 0.1
   val_frac: 0.1
-  metrics: [mse, rmse, ci, pearson, spearman]
+  offline_metrics: [auc, logloss, ndcg@10, ndcg@20, recall@10, mrr]
+  business_metrics: [ctr, avg_dwell, session_length, diversity_score, novelty_score]
+  bandit_metrics: [avg_reward, ips_estimate, snips_estimate, action_entropy]
   num_seeds: 3
   seeds: [42, 123, 456]
 

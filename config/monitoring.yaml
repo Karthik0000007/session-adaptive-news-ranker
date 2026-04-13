@@ -1,0 +1,32 @@
+# Monitoring configuration — alert thresholds
+monitoring:
+  # Business metrics alerts
+  business:
+    ctr_drop_threshold: 0.10       # Alert if CTR drops >10% (1h window)
+    avg_dwell_min: 20              # Alert if avg dwell <20s
+    session_length_min: 3          # Alert if avg session length <3
+
+  # System metrics alerts
+  system:
+    p99_latency_ms: 150            # Alert if P99 >150ms
+    error_rate_threshold: 0.01     # Alert if error rate >1%
+    cache_hit_rate_min: 0.70       # Alert if cache hit rate <70%
+    cpu_usage_max: 0.80            # Alert if CPU >80%
+
+  # Distribution drift alerts
+  drift:
+    ks_threshold: 0.05             # KS test p-value threshold
+    kl_divergence_max: 0.3         # KL divergence threshold
+    mean_shift_max: 0.20           # Mean shift >20%
+
+  # Bandit metrics alerts
+  bandit:
+    reward_drop_threshold: 0.15    # Alert if reward drops >15%
+    action_entropy_min: 0.3        # Alert if action entropy <0.3
+
+  # Logging
+  logging:
+    level: INFO
+    format: json                   # Structured logging
+    per_request: true              # Log every request
+    aggregate_interval: 3600       # Aggregate stats hourly
