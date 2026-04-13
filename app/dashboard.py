@@ -310,22 +310,57 @@ def plot_bandit_learning(logs):
             st.metric("SNIPS Estimate", f"{metrics.get('snips_reward', 0):.4f}")
 
 
+def plot_system_metrics():
+    """View 5: System Health (Fix 13 dashboard integration)"""
+    st.header("⚡ System Health")
+
+    try:
+        import requests as req
+        response = req.get("http://localhost:8000/metrics/system", timeout=3)
+        metrics = response.json()
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Models Loaded", "✅" if metrics.get('models_loaded') else "❌")
+        with col2:
+            st.metric("Redis Connected", "✅" if metrics.get('redis_connected') else "❌")
+        with col3:
+            st.metric("Redis Memory", f"{metrics.get('redis_memory_mb', 0):.1f} MB")
+        with col4:
+            st.metric("Active Keys", metrics.get('redis_keys', 0))
+
+        st.success("API server is healthy")
+
+        # Privacy compliance status
+        st.subheader("🔒 Privacy Compliance (APPI)")
+        try:
+            privacy = req.get("http://localhost:8000/privacy/purpose", timeout=3).json()
+            st.json(privacy)
+        except Exception:
+            st.info("Privacy endpoint not reachable")
+
+    except Exception:
+        st.error("Cannot connect to API server at localhost:8000")
+        st.info("Start the API server with: `make serve` or `uvicorn app.serve:app`")
+
+
 def main():
     """Main dashboard"""
     st.title("📰 Session-Adaptive News Ranker Dashboard")
     st.markdown("Interactive visualization of ranking strategies and trade-offs")
-    
+
     # Sidebar
     st.sidebar.title("Navigation")
     view = st.sidebar.radio(
         "Select View",
-        ["Trade-off Analysis", "Session Evolution", "Strategy Comparison", "Bandit Learning"]
+        ["Trade-off Analysis", "Session Evolution", "Strategy Comparison",
+         "Bandit Learning", "System Health"]
     )
-    
+
     # Load data
     results = load_ab_test_results()
     logs = load_bandit_logs()
-    
+
     # Display selected view
     if view == "Trade-off Analysis":
         plot_tradeoff_curves(results)
@@ -335,7 +370,9 @@ def main():
         plot_ranking_comparison(results)
     elif view == "Bandit Learning":
         plot_bandit_learning(logs)
-    
+    elif view == "System Health":
+        plot_system_metrics()
+
     # Footer
     st.sidebar.markdown("---")
     st.sidebar.markdown("### About")
@@ -344,6 +381,7 @@ def main():
         "It shows trade-offs between engagement, diversity, and retention across "
         "different ranking strategies."
     )
+    st.sidebar.markdown("**Version:** 2.0.0")
 
 
 if __name__ == '__main__':
