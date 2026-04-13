@@ -116,6 +116,20 @@ class RankingFeatureBuilder:
             'session_day_of_week': session_state.get('day_of_week', 0)
         }
     
+    def extract_position_features(self, position: int) -> Dict:
+        """
+        Extract position-related features for debiasing.
+        
+        Position bias: items at top get more clicks regardless of quality.
+        Including position as a feature allows the model to learn this bias.
+        """
+        return {
+            'display_position': position,
+            'position_log_discount': 1.0 / np.log2(position + 2),
+            'is_top3': int(position < 3),
+            'is_top10': int(position < 10)
+        }
+    
     def extract_interaction_features(self, 
                                     user_id: str,
                                     article_id: str,
@@ -161,11 +175,12 @@ class RankingFeatureBuilder:
                       article_id: str,
                       session_state: Dict,
                       article_metadata: Dict[str, Dict],
-                      clicked_history: List[str]) -> Dict:
+                      clicked_history: List[str],
+                      position: int = 0) -> Dict:
         """
         Build complete feature vector for ranking
         
-        Combines all feature types
+        Combines all feature types including position features for debiasing.
         """
         features = {}
         
@@ -182,6 +197,9 @@ class RankingFeatureBuilder:
         features.update(self.extract_interaction_features(
             user_id, article_id, article_metadata, clicked_history
         ))
+        
+        # Position features (for debiasing)
+        features.update(self.extract_position_features(position))
         
         return features
     
@@ -214,18 +232,26 @@ class RankingFeatureBuilder:
                 'day_of_week': sample.get('day_of_week', 0)
             }
             
-            # Build features
+            # Build features (with position for debiasing)
             features = self.build_features(
                 user_id=sample['user_id'],
                 article_id=sample['article_id'],
                 session_state=session_state,
                 article_metadata=article_metadata,
-                clicked_history=[]  # Simplified for now
+                clicked_history=[],  # Simplified for now
+                position=sample.get('position', 0)
             )
             
             # Add labels
             features['label_click'] = sample['label_click']
             features['label_dwell'] = sample['label_dwell']
+            
+            # Add retention label if available from pipeline
+            if 'label_retention' in sample:
+                features['label_retention'] = sample['label_retention']
+            
+            # Store position for IPS sample weighting
+            features['_position_for_ips'] = sample.get('position', 0)
             
             # Add metadata for splitting
             features['user_id'] = sample['user_id']

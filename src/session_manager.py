@@ -2,10 +2,11 @@
 Session Manager
 
 Handles session state persistence and updates using Redis.
+Fix 5 (P1): Uses JSON serialization instead of pickle for security.
 """
 
 import redis
-import pickle
+import json
 from typing import Dict, Optional
 import logging
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class SessionManager:
-    """Manages user session state with Redis backend"""
+    """Manages user session state with Redis backend (JSON serialization)"""
     
     def __init__(self, redis_host: str = 'localhost', redis_port: int = 6379,
                  redis_db: int = 0, ttl: int = 3600):
@@ -36,7 +37,7 @@ class SessionManager:
                 host=host,
                 port=port,
                 db=db,
-                decode_responses=False
+                decode_responses=True  # Fix 5: string mode for JSON
             )
             client.ping()
             logger.info("Redis connected successfully")
@@ -62,7 +63,7 @@ class SessionManager:
             key = f"session:{user_id}"
             data = self.redis_client.get(key)
             if data:
-                return pickle.loads(data)
+                return json.loads(data)  # Fix 5: JSON instead of pickle
         except Exception as e:
             logger.error(f"Error getting session: {e}")
         
@@ -84,14 +85,14 @@ class SessionManager:
             self.redis_client.setex(
                 key,
                 self.ttl,
-                pickle.dumps(state)
+                json.dumps(state)  # Fix 5: JSON instead of pickle
             )
         except Exception as e:
             logger.error(f"Error updating session: {e}")
     
     def delete_session(self, user_id: str):
         """
-        Delete session for user
+        Delete session for user (APPI Article 30 support)
         
         Args:
             user_id: User identifier
