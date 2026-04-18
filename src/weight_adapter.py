@@ -129,16 +129,16 @@ class WeightAdapter:
         
         if avg_dwell > self.high_engagement_threshold:
             return f"High engagement (dwell={avg_dwell:.1f}s): Maximizing engagement"
-        
+
         if fatigue > self.fatigue_threshold:
             return f"Fatigue detected (score={fatigue:.2f}): Boosting novelty + retention"
-        
+
         return "Default: Balanced weights"
-    
+
     def reset(self):
         """Reset previous weights (e.g., for new session)"""
         self.previous_weights = None
-    
+
     def get_baseline_weights(self) -> List[float]:
         """Get fixed baseline weights for comparison"""
         return self.default_weights.copy()
