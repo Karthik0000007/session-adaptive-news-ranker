@@ -63,19 +63,19 @@ class WeightAdapter:
         session_length = session_state.get('session_length', 0)
         avg_dwell = session_state.get('avg_dwell_time', 0)
         fatigue = session_state.get('fatigue_score', 0)
-        
+
         # Rule 1: Early session (cold start)
         if session_length < self.early_session_threshold:
             return [0.25, 0.20, 0.35, 0.20]  # Boost diversity + novelty
-        
+
         # Rule 2: High engagement detected
         if avg_dwell > self.high_engagement_threshold:
             return [0.50, 0.25, 0.15, 0.10]  # Maximize engagement
-        
+
         # Rule 3: Fatigue / boredom
         if fatigue > self.fatigue_threshold:
             return [0.20, 0.30, 0.25, 0.25]  # Boost novelty + retention
-        
+
         # Rule 4: Default
         return self.default_weights
 
