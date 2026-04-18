@@ -78,10 +78,10 @@ class WeightAdapter:
         
         # Rule 4: Default
         return self.default_weights
-    
+
     def _smooth_weights(self,
-                       new_weights: List[float],
-                       prev_weights: List[float]) -> List[float]:
+                        new_weights: List[float],
+                        prev_weights: List[float]) -> List[float]:
         """
         Smooth weight transitions to avoid abrupt changes
 
@@ -93,7 +93,7 @@ class WeightAdapter:
         smoothed = self.alpha * new_array + (1 - self.alpha) * prev_array
 
         return smoothed.tolist()
-    
+
     def _enforce_constraints(self, weights: List[float]) -> List[float]:
         """
         Enforce weight constraints:
