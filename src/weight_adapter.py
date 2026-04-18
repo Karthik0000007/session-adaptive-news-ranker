@@ -101,32 +101,32 @@ class WeightAdapter:
         - Sum of weights = 1
         """
         weights_array = np.array(weights)
-        
+
         # Ensure non-negative
         weights_array = np.maximum(weights_array, 0)
-        
+
         # Normalize to sum to 1
         total = weights_array.sum()
         if total > 0:
             weights_array = weights_array / total
         else:
             weights_array = np.array(self.default_weights)
-        
+
         return weights_array.tolist()
-    
+
     def get_rule_explanation(self, session_state: Dict) -> str:
         """
         Get human-readable explanation of which rule was applied
-        
+
         Useful for debugging and interpretability
         """
         session_length = session_state.get('session_length', 0)
         avg_dwell = session_state.get('avg_dwell_time', 0)
         fatigue = session_state.get('fatigue_score', 0)
-        
+
         if session_length < self.early_session_threshold:
             return f"Early session (length={session_length}): Boosting diversity + novelty"
-        
+
         if avg_dwell > self.high_engagement_threshold:
             return f"High engagement (dwell={avg_dwell:.1f}s): Maximizing engagement"
 
