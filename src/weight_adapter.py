@@ -79,19 +79,19 @@ class WeightAdapter:
         # Rule 4: Default
         return self.default_weights
     
-    def _smooth_weights(self, 
-                       new_weights: List[float], 
+    def _smooth_weights(self,
+                       new_weights: List[float],
                        prev_weights: List[float]) -> List[float]:
         """
         Smooth weight transitions to avoid abrupt changes
-        
+
         w_final = alpha * w_new + (1 - alpha) * w_prev
         """
         new_array = np.array(new_weights)
         prev_array = np.array(prev_weights)
-        
+
         smoothed = self.alpha * new_array + (1 - self.alpha) * prev_array
-        
+
         return smoothed.tolist()
     
     def _enforce_constraints(self, weights: List[float]) -> List[float]:
